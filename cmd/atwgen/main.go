@@ -43,40 +43,55 @@ func gen(dirPath string) error {
 		return err
 	}
 
-	fontBytes, err := ioutil.ReadFile("/Users/bariteau/Downloads/love_letter_tw/Lovelt__.ttf")
-	if err != nil {
-		return errors.New("Unable to read font file")
-	}
-	font, err := freetype.ParseFont(fontBytes)
-
-	if err != nil {
-		return errors.New("Unable to parse font file")
-	}
-
 	img := image.NewNRGBA(image.Rect(0, 0, 1000, 1000))
 	draw.Draw(img, image.Rect(0, 0, 1000, 1000), image.NewUniform(color.Black), image.Point{0, 0}, draw.Over)
-	fontContext := freetype.NewContext()
-	fontContext.SetFont(font)
-	fontContext.SetFontSize(12.0)
-	fontContext.SetSrc(image.NewUniform(color.White))
-	fontContext.SetDst(img)
-	fontContext.SetClip(img.Bounds())
+
+	fontContext, err := createFontContext(img)
+	if err != nil {
+		return err
+	}
+
 	fontContext.DrawString(string(text), freetype.Pt(100, 100))
-	outimg, err := os.Create("out.png")
-	defer func() {
-		er := outimg.Close()
-		if er != nil {
-			err = er
-		}
-	}()
+	writeImgToFile("out.png", img)
+
+	return nil
+}
+
+func writeImgToFile(filename string, img image.Image) error {
+	outimg, err := os.Create(filename)
 	if err != nil {
 		return errors.New(fmt.Sprint("Unable to open image for writing", err))
 	}
+	defer outimg.Close()
+
 	err = png.Encode(outimg, img)
 	if err != nil {
 		return errors.New("Unable to write image")
 	}
 	return nil
+}
+
+func createFontContext(dst draw.Image) (fontContext *freetype.Context, err error) {
+	fontContext = freetype.NewContext()
+
+	fontBytes, err := ioutil.ReadFile("/Users/bariteau/Downloads/love_letter_tw/Lovelt__.ttf")
+	if err != nil {
+		err = errors.New("Unable to read font file")
+		return
+	}
+	font, err := freetype.ParseFont(fontBytes)
+
+	if err != nil {
+		err = errors.New("Unable to parse font file")
+		return
+	}
+
+	fontContext.SetFont(font)
+	fontContext.SetFontSize(12.0)
+	fontContext.SetSrc(image.NewUniform(color.White))
+	fontContext.SetDst(dst)
+	fontContext.SetClip(dst.Bounds())
+	return
 }
 
 func getSrcFiles(dirPath string) (captions *os.File, pictures []*os.File, err error) {
