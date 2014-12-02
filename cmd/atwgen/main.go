@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"image"
@@ -10,6 +11,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"code.google.com/p/freetype-go/freetype"
@@ -24,37 +27,36 @@ func main() {
 
 	dirPath := os.Args[1]
 
-	err := gen(dirPath)
+	img, err := gen(dirPath)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 	}
+	writeImgToFile("out.png", img)
 }
 
-func gen(dirPath string) error {
-	captionFile, _, err := getSrcFiles(dirPath)
+func gen(dirPath string) (img draw.Image, err error) {
+	captions, pictures, err := getSrcData(dirPath)
 	if err != nil {
-		return err
+		return
 	}
-	if captionFile == nil {
-		return errors.New("No caption file found")
+	if len(captions) == 0 {
+		err = errors.New("No caption file found or empty caption file")
+		return
 	}
-	text, err := ioutil.ReadAll(captionFile)
-	if err != nil {
-		return err
-	}
+	text := captions[0]
 
-	img := image.NewNRGBA(image.Rect(0, 0, 1000, 1000))
+	img = image.NewNRGBA(image.Rect(0, 0, 1000, 1000))
 	draw.Draw(img, image.Rect(0, 0, 1000, 1000), image.NewUniform(color.Black), image.Point{0, 0}, draw.Over)
+	draw.Draw(img, image.Rect(0, 0, 100, 100), pictures[0], image.Point{0, 0}, draw.Over)
 
 	fontContext, err := createFontContext(img)
 	if err != nil {
-		return err
+		return
 	}
 
 	fontContext.DrawString(string(text), freetype.Pt(100, 100))
-	writeImgToFile("out.png", img)
 
-	return nil
+	return
 }
 
 func writeImgToFile(filename string, img image.Image) error {
@@ -94,6 +96,29 @@ func createFontContext(dst draw.Image) (fontContext *freetype.Context, err error
 	return
 }
 
+func getSrcData(dirPath string) (captions []string, pictures []image.Image, err error) {
+	captionFile, pictureFiles, err := getSrcFiles(dirPath)
+	if err != nil {
+		return
+	}
+	captionFileScanner := bufio.NewScanner(captionFile)
+	for captionFileScanner.Scan() {
+		captions = append(captions, captionFileScanner.Text())
+	}
+	err = captionFileScanner.Err()
+
+	pictures = make([]image.Image, len(pictureFiles))
+	for i, pictureFile := range pictureFiles {
+		pictures[i], _, err = image.Decode(pictureFile)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+var imgSrcFilenamesPattern = regexp.MustCompile("([1-3])[.](png|PNG)")
+
 func getSrcFiles(dirPath string) (captions *os.File, pictures []*os.File, err error) {
 	dir, err := os.Open(dirPath)
 	if err != nil {
@@ -114,8 +139,10 @@ func getSrcFiles(dirPath string) (captions *os.File, pictures []*os.File, err er
 		return
 	}
 
+	picturesFileMap := make(map[string]*os.File)
 	for _, fileinfo := range fileinfos {
 		name := fileinfo.Name()
+		fmt.Println(name)
 		if strings.HasPrefix(name, "caption") {
 			if captions == nil {
 				captions, err = os.Open(path.Join(dirPath, name))
@@ -123,8 +150,18 @@ func getSrcFiles(dirPath string) (captions *os.File, pictures []*os.File, err er
 					captions = nil
 				}
 			}
-			continue
+		} else if matches := imgSrcFilenamesPattern.FindStringSubmatch(name); matches != nil {
+			file, err := os.Open(path.Join(dirPath, name))
+			if err != nil {
+				continue
+			}
+			picturesFileMap[matches[1]] = file
 		}
+	}
+
+	pictures = make([]*os.File, len(picturesFileMap))
+	for i := range pictures {
+		pictures[i] = picturesFileMap[strconv.Itoa(i+1)]
 	}
 	return
 }
