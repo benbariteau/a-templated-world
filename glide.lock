@@ -1,0 +1,14 @@
+hash: ba4c1dfde3ab7f8f305d1fd4cd2e1f10a8e71ef0d6816a90940f1a8dc5348934
+updated: 2016-07-21T16:17:13.083841876-07:00
+imports:
+- name: github.com/golang/freetype
+  version: 38b4c392adc5eed94207994c4848fff99f4ac234
+  subpackages:
+  - truetype
+  - raster
+- name: golang.org/x/image
+  version: c348254d65821a0aaca538bf5e7774bb522c1dec
+  subpackages:
+  - font
+  - math/fixed
+testImports: []
