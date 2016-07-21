@@ -24,6 +24,7 @@ func getImage(path string) image.Image {
 
 func main() {
 	templateImage := getImage("template.png")
+	templateMask := getImage("template_mask.png")
 	backgroundImage := getImage("background")
 
 	destinationImage := image.NewNRGBA(templateImage.Bounds())
@@ -42,7 +43,7 @@ func main() {
 		destinationImage.Bounds(),
 		backgroundImage,
 		image.ZP,
-		templateImage,
+		templateMask,
 		image.ZP,
 		draw.Over,
 	)
