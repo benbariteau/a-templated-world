@@ -54,16 +54,20 @@ func writeBackground(destinationImage draw.Image) draw.Image {
 	return destinationImage
 }
 
-func main() {
-	destinationImage := writeBackground(generateBasicTemplate())
-
-	fd, err := os.Create("out.png")
+func writeImage(path string, image image.Image) error {
+	fd, err := os.Create(path)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer fd.Close()
 
-	err = png.Encode(fd, destinationImage)
+	return png.Encode(fd, image)
+}
+
+func main() {
+	destinationImage := writeBackground(generateBasicTemplate())
+
+	err = writeImage("out.png", destinationImage)
 	if err != nil {
 		panic(err)
 	}
