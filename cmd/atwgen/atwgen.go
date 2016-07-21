@@ -88,6 +88,13 @@ func getFont() *truetype.Font {
 	return font
 }
 
+const (
+	fontSize              = 16.0
+	baselineX             = 30
+	baselineY             = 120
+	textBackgroundPadding = 2
+)
+
 func writeText(textConfig []string, destinationImage draw.Image) draw.Image {
 	if len(textConfig) > 3 {
 		panic(errors.New("more than three captions specified"))
@@ -95,10 +102,10 @@ func writeText(textConfig []string, destinationImage draw.Image) draw.Image {
 
 	fontFace := truetype.NewFace(
 		getFont(),
-		&truetype.Options{Size: 16.0},
+		&truetype.Options{Size: fontSize},
 	)
-	x0 := 30
-	y1 := 120
+	x0 := baselineX
+	y1 := baselineY
 	startPoint := fixed.P(x0, y1)
 	drawer := &font.Drawer{
 		Dst:  destinationImage,
@@ -108,7 +115,7 @@ func writeText(textConfig []string, destinationImage draw.Image) draw.Image {
 	}
 
 	drawDistance := drawer.MeasureString(textConfig[0])
-	paddingPixels := 2
+	paddingPixels := textBackgroundPadding
 	borderRect := image.Rect(
 		x0-paddingPixels,
 		y1-fontFace.Metrics().Ascent.Round()-paddingPixels,
