@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"image/draw"
 	_ "image/jpeg"
@@ -75,6 +76,11 @@ func writeImage(path string, image image.Image) error {
 
 func main() {
 	destinationImage := writeBackground(generateBasicTemplate())
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println(r)
+		}
+	}()
 
 	err := writeImage("out.png", destinationImage)
 	if err != nil {
