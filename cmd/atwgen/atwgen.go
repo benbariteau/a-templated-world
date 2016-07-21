@@ -22,11 +22,8 @@ func getImage(path string) image.Image {
 	return image
 }
 
-func main() {
+func generateBasicTemplate() draw.Image {
 	templateImage := getImage("template.png")
-	templateMask := getImage("template_mask.png")
-	backgroundImage := getImage("background")
-
 	destinationImage := image.NewNRGBA(templateImage.Bounds())
 
 	// put base template into our destination
@@ -37,6 +34,13 @@ func main() {
 		image.ZP,
 		draw.Src,
 	)
+	return destinationImage
+}
+
+func main() {
+	destinationImage := generateBasicTemplate()
+	templateMask := getImage("template_mask.png")
+	backgroundImage := getImage("background")
 
 	draw.DrawMask(
 		destinationImage,
