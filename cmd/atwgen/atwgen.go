@@ -104,9 +104,8 @@ func writeText(textConfig []string, destinationImage draw.Image) draw.Image {
 		getFont(),
 		&truetype.Options{Size: fontSize},
 	)
-	x0 := baselineX
-	y1 := baselineY
-	startPoint := fixed.P(x0, y1)
+
+	startPoint := fixed.P(baselineX, baselineY)
 	drawer := &font.Drawer{
 		Dst:  destinationImage,
 		Src:  image.Black,
@@ -117,10 +116,10 @@ func writeText(textConfig []string, destinationImage draw.Image) draw.Image {
 	drawDistance := drawer.MeasureString(textConfig[0])
 	paddingPixels := textBackgroundPadding
 	borderRect := image.Rect(
-		x0-paddingPixels,
-		y1-fontFace.Metrics().Ascent.Round()-paddingPixels,
-		x0+drawDistance.Round()+paddingPixels,
-		y1+paddingPixels,
+		baselineX-paddingPixels,
+		baselineY-fontFace.Metrics().Ascent.Round()-paddingPixels,
+		baselineX+drawDistance.Round()+paddingPixels,
+		baselineY+paddingPixels,
 	)
 	draw.DrawMask(
 		destinationImage,
