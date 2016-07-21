@@ -6,24 +6,33 @@ import (
 	_ "image/jpeg"
 	"image/png"
 	"os"
+	// "github.com/golang/freetype"
 )
 
-func getImage(path string) image.Image {
-	imageFd, err := os.Open(path)
-	if err != nil {
-		panic(err)
-	}
-	defer imageFd.Close()
-
-	image, _, err := image.Decode(imageFd)
+func mustGetImage(path string) image.Image {
+	image, err := getImage(path)
 	if err != nil {
 		panic(err)
 	}
 	return image
 }
 
+func getImage(path string) (image.Image, error) {
+	imageFd, err := os.Open(path)
+	if err != nil {
+		return image.Black, err
+	}
+	defer imageFd.Close()
+
+	img, _, err := image.Decode(imageFd)
+	if err != nil {
+		return image.Black, err
+	}
+	return img, nil
+}
+
 func generateBasicTemplate() draw.Image {
-	templateImage := getImage("template.png")
+	templateImage := mustGetImage("template.png")
 	destinationImage := image.NewNRGBA(templateImage.Bounds())
 
 	// put base template into our destination
@@ -38,8 +47,8 @@ func generateBasicTemplate() draw.Image {
 }
 
 func writeBackground(destinationImage draw.Image) draw.Image {
-	templateMask := getImage("template_mask.png")
-	backgroundImage := getImage("background")
+	templateMask := mustGetImage("template_mask.png")
+	backgroundImage := mustGetImage("background")
 
 	draw.DrawMask(
 		destinationImage,
@@ -67,7 +76,7 @@ func writeImage(path string, image image.Image) error {
 func main() {
 	destinationImage := writeBackground(generateBasicTemplate())
 
-	err = writeImage("out.png", destinationImage)
+	err := writeImage("out.png", destinationImage)
 	if err != nil {
 		panic(err)
 	}
