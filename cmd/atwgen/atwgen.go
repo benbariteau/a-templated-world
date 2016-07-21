@@ -95,6 +95,15 @@ const (
 	textBackgroundPadding = 3
 )
 
+func withPadding(rect image.Rectangle, padding int) image.Rectangle {
+	return image.Rect(
+		rect.Min.X-paddingPixels,
+		rect.Min.Y-paddingPixels,
+		rect.Max.X+paddingPixels,
+		rect.Max.Y+paddingPixels,
+	)
+}
+
 func writeText(textConfig []string, destinationImage draw.Image) draw.Image {
 	if len(textConfig) > 3 {
 		panic(errors.New("more than three captions specified"))
@@ -115,11 +124,14 @@ func writeText(textConfig []string, destinationImage draw.Image) draw.Image {
 
 	drawDistance := drawer.MeasureString(textConfig[0])
 	paddingPixels := textBackgroundPadding
-	borderRect := image.Rect(
-		baselineX-paddingPixels,
-		baselineY-fontFace.Metrics().Ascent.Round()-paddingPixels,
-		baselineX+drawDistance.Round()+paddingPixels,
-		baselineY+paddingPixels,
+	borderRect := withPadding(
+		image.Rect(
+			baselineX,
+			baselineY-fontFace.Metrics().Ascent.Round(),
+			baselineX+drawDistance.Round(),
+			baselineY,
+		),
+		textBackgroundPadding,
 	)
 	draw.DrawMask(
 		destinationImage,
