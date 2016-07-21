@@ -37,8 +37,7 @@ func generateBasicTemplate() draw.Image {
 	return destinationImage
 }
 
-func main() {
-	destinationImage := generateBasicTemplate()
+func writeBackground(destinationImage draw.Image) draw.Image {
 	templateMask := getImage("template_mask.png")
 	backgroundImage := getImage("background")
 
@@ -51,6 +50,12 @@ func main() {
 		image.ZP,
 		draw.Over,
 	)
+
+	return destinationImage
+}
+
+func main() {
+	destinationImage := writeBackground(generateBasicTemplate())
 
 	fd, err := os.Create("out.png")
 	if err != nil {
