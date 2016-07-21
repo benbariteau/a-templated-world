@@ -89,7 +89,7 @@ func getFont() *truetype.Font {
 }
 
 const (
-	fontSize              = 16.0
+	fontSize              = 14.0
 	baselineX             = 30
 	baselineY             = 120
 	textBackgroundPadding = 2
