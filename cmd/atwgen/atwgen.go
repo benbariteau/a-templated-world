@@ -59,7 +59,7 @@ func writeBackground(destinationImage draw.Image) draw.Image {
 	// resize to the size of the template
 	backgroundImage = resize.Resize(
 		// scale to the width of the template
-		720,
+		comicWidth,
 		0,
 		backgroundImage,
 		resize.Bilinear,
@@ -98,6 +98,7 @@ func getFont() *truetype.Font {
 }
 
 const (
+	comicWidth            = 720
 	fontSize              = 14.0
 	baselineX             = 30
 	baselineY             = 120
