@@ -107,12 +107,10 @@ const (
 	comicWidth            = 720
 	comicHeight           = 275
 	fontSize              = 14.0
-	baselineX             = 30
-	baselineY             = 120
 	textBackgroundPadding = 3
 )
 
-var baselineStartPoint = image.Point(baselineX, baselineY)
+var baselineStartPoint = image.Pt(30, 120)
 
 func withPadding(rect image.Rectangle, padding int) image.Rectangle {
 	return image.Rect(
@@ -199,13 +197,13 @@ func writeSingleText(text string) draw.Image {
 		// create a rectangle for the border
 		image.Rect(
 			// top left x is the same as the baseline
-			baselineX,
+			baselineStartPoint.X,
 			// top left y is the baseline y moved up by the ascent of the font (the distance between the baseline and the top of the font)
-			baselineY-fontFace.Metrics().Ascent.Round(),
+			baselineStartPoint.Y-fontFace.Metrics().Ascent.Round(),
 			// bottom right x is the baseline start point x plus the calculated distance for drawing
-			baselineX+drawDistance.Round(),
+			baselineStartPoint.X+drawDistance.Round(),
 			// bottom right y is the same as the baseline
-			baselineY,
+			baselineStartPoint.Y,
 		),
 		// pad that rectangle
 		textBackgroundPadding,
@@ -227,7 +225,7 @@ func writeSingleText(text string) draw.Image {
 		Dst:  destinationImage,
 		Src:  image.Black,
 		Face: fontFace,
-		Dot:  fixed.P(baselineX, baselineY),
+		Dot:  fixed.P(baselineStartPoint.X, baselineStartPoint.Y),
 	}
 	drawer.DrawString(text)
 
