@@ -164,17 +164,17 @@ func copyImage(img image.Image) draw.Image {
 	return copyTo
 }
 
-func writeTextList(textConfig []string, destinationImage draw.Image) draw.Image {
+func writeTextList(textConfigList []textConf, destinationImage draw.Image) draw.Image {
 	// copy for easier semantics
 	destinationImage = copyImage(destinationImage)
 
-	for i, text := range textConfig {
+	for i, textConfig := range textConfigList {
 		// writing an empty string still does a background, so let's not do that
-		if text == "" {
+		if textConfig.text == "" {
 			continue
 		}
 		// create text image for panel
-		textImage := writeSingleText(textConf{text: text})
+		textImage := writeSingleText(textConfig)
 		// write text image on top of panel
 		draw.DrawMask(
 			destinationImage,
@@ -313,7 +313,14 @@ func writeImage(path string, image image.Image) error {
 }
 
 func main() {
-	destinationImage := writeTextList([]string{"foo", "bar", "baz"}, writeBackground(generateBasicTemplate()))
+	destinationImage := writeTextList(
+		[]textConf{
+			textConf{text: "foo"},
+			textConf{text: "bar"},
+			textConf{text: "baz"},
+		},
+		writeBackground(generateBasicTemplate()),
+	)
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println(r)
