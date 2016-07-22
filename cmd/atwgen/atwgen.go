@@ -64,12 +64,18 @@ func writeBackground(destinationImage draw.Image) draw.Image {
 		backgroundImage,
 		resize.Bilinear,
 	)
+	// this centers the background image such that the center of it (vertically) is in the center of the comic
+	backgroundStartingY := (backgroundImage.Bounds().Dy() - comicHeight) / 2
+	if backgroundStartingY < 0 {
+		// this probably looks bad because it means the image is shorted than the comic
+		backgroundStartingY = 0
+	}
 
 	draw.DrawMask(
 		destinationImage,
 		destinationImage.Bounds(),
 		backgroundImage,
-		image.ZP,
+		image.Pt(0, backgroundStartingY),
 		templateMask,
 		image.ZP,
 		draw.Over,
@@ -99,6 +105,7 @@ func getFont() *truetype.Font {
 
 const (
 	comicWidth            = 720
+	comicHeight           = 275
 	fontSize              = 14.0
 	baselineX             = 30
 	baselineY             = 120
