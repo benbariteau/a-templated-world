@@ -180,6 +180,25 @@ func writeTextList(textConfig []string, destinationImage draw.Image) draw.Image 
 	return destinationImage
 }
 
+// between -10 and 10 pixel offset
+const offsetBound = 21
+
+func offset(text string, reduce func(left, right rune) rune) int {
+	var accumulator rune
+	for _, ch := range text {
+		accumulator = reduce(accumulator, ch)
+	}
+	return int(accumulator%offsetBound - (offsetBound / 2))
+}
+
+func offsetX(text string) int {
+	return offset(text, func(left, right rune) rune { return left * right })
+}
+
+func offsetY(text string) int {
+	return offset(text, func(left, right rune) rune { return left + right })
+}
+
 func writeSingleText(text string) draw.Image {
 	// create a panel image to draw our text to
 	destinationImage := image.NewNRGBA(panelRectangle)
@@ -193,17 +212,23 @@ func writeSingleText(text string) draw.Image {
 	// create a drawer to draw the text starting at the baseline point, in the font and measure the distance of the string
 	drawDistance := (&font.Drawer{Face: fontFace}).MeasureString(text)
 
+	// add some variance to the starting baseline
+	startPoint := image.Pt(
+		baselineStartPoint.X+offsetX(text),
+		baselineStartPoint.Y+offsetY(text),
+	)
+
 	borderRect := withPadding(
 		// create a rectangle for the border
 		image.Rect(
 			// top left x is the same as the baseline
-			baselineStartPoint.X,
+			startPoint.X,
 			// top left y is the baseline y moved up by the ascent of the font (the distance between the baseline and the top of the font)
-			baselineStartPoint.Y-fontFace.Metrics().Ascent.Round(),
+			startPoint.Y-fontFace.Metrics().Ascent.Round(),
 			// bottom right x is the baseline start point x plus the calculated distance for drawing
-			baselineStartPoint.X+drawDistance.Round(),
+			startPoint.X+drawDistance.Round(),
 			// bottom right y is the same as the baseline
-			baselineStartPoint.Y,
+			startPoint.Y,
 		),
 		// pad that rectangle
 		textBackgroundPadding,
@@ -225,7 +250,10 @@ func writeSingleText(text string) draw.Image {
 		Dst:  destinationImage,
 		Src:  image.Black,
 		Face: fontFace,
-		Dot:  fixed.P(baselineStartPoint.X, baselineStartPoint.Y),
+		Dot: fixed.P(
+			startPoint.X,
+			startPoint.Y,
+		),
 	}
 	drawer.DrawString(text)
 
@@ -243,7 +271,7 @@ func writeImage(path string, image image.Image) error {
 }
 
 func main() {
-	destinationImage := writeTextList([]string{"foo", "", "baz"}, writeBackground(generateBasicTemplate()))
+	destinationImage := writeTextList([]string{"foo", "bar", "baz"}, writeBackground(generateBasicTemplate()))
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println(r)
