@@ -132,6 +132,10 @@ var panelToRectangle = func() map[int]image.Rectangle {
 
 func writeText(textConfig []string, destinationImage draw.Image) draw.Image {
 	for i, text := range textConfig {
+		// writing an empty string still does a background, so let's not do that
+		if text == "" {
+			continue
+		}
 		// create text image for panel
 		textImage := writeLessText(text)
 		// write text image on top of panel
@@ -200,7 +204,7 @@ func writeImage(path string, image image.Image) error {
 }
 
 func main() {
-	destinationImage := writeText([]string{"foo", "bar", "baz"}, writeBackground(generateBasicTemplate()))
+	destinationImage := writeText([]string{"foo", "", "baz"}, writeBackground(generateBasicTemplate()))
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println(r)
