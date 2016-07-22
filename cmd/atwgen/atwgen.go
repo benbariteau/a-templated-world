@@ -155,7 +155,7 @@ func writeTextList(textConfig []string, destinationImage draw.Image) draw.Image 
 			continue
 		}
 		// create text image for panel
-		textImage := writeLessText(text)
+		textImage := writeSingleText(text)
 		// write text image on top of panel
 		draw.DrawMask(
 			destinationImage,
@@ -170,7 +170,7 @@ func writeTextList(textConfig []string, destinationImage draw.Image) draw.Image 
 	return destinationImage
 }
 
-func writeLessText(text string) draw.Image {
+func writeSingleText(text string) draw.Image {
 	destinationImage := image.NewNRGBA(panelRectangle)
 
 	fontFace := truetype.NewFace(
