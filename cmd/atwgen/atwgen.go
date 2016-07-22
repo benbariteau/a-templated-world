@@ -53,7 +53,12 @@ func generateBasicTemplate() draw.Image {
 	return destinationImage
 }
 
-func writeBackground(place placement, destinationImage draw.Image) draw.Image {
+type backgroundConf struct {
+	Path      string
+	Placement placement
+}
+
+func writeBackground(backgroundConfig backgroundConf, destinationImage draw.Image) draw.Image {
 	templateMask := mustGetImage("template_mask.png")
 	backgroundImage := mustGetImage("background")
 
@@ -67,8 +72,9 @@ func writeBackground(place placement, destinationImage draw.Image) draw.Image {
 	)
 	backgroundImageHeight := backgroundImage.Bounds().Dy()
 	backgroundSegmentSize := backgroundImageHeight / 5
-	backgroundStartingY := (int(place) - 1) * backgroundSegmentSize
+	backgroundStartingY := (int(backgroundConfig.Placement) - 1) * backgroundSegmentSize
 
+	// if the placement makes the image not fully fit in the template, align the bottom edge with the bottom edge of the template
 	if destinationImageHeight, pixelsInImage := destinationImage.Bounds().Dy(), backgroundImageHeight-backgroundStartingY; pixelsInImage < destinationImageHeight {
 		backgroundStartingY = backgroundImageHeight - destinationImageHeight
 	}
@@ -374,7 +380,7 @@ func main() {
 
 	destinationImage := writeTextList(
 		panelConfList2textConfList(conf.PanelConfigList),
-		writeBackground(topMiddlePlacement, generateBasicTemplate()),
+		writeBackground(backgroundConf{Placement: topMiddlePlacement, Path: "background"}, generateBasicTemplate()),
 	)
 
 	err = writeImage("out.png", destinationImage)
