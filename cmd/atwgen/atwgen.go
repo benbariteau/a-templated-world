@@ -370,6 +370,13 @@ func panelConfList2textConfList(panelConfigList []panelConf) []textConf {
 	return textConfigList
 }
 
+func comicBackgroundConf2backgroundConf(comicBackgroundConfig comicBackgroundConf) backgroundConf {
+	return backgroundConf{
+		Placement: string2placement(comicBackgroundConfig.Placement),
+		Path:      comicBackgroundConfig.Path,
+	}
+}
+
 func main() {
 	defer func() {
 		if r := recover(); r != nil {
@@ -391,7 +398,10 @@ func main() {
 
 	destinationImage := writeTextList(
 		panelConfList2textConfList(conf.PanelConfigList),
-		writeBackground(backgroundConf{Placement: topMiddlePlacement, Path: "background"}, generateBasicTemplate()),
+		writeBackground(
+			comicBackgroundConf2backgroundConf(conf.BackgroundConfig),
+			generateBasicTemplate(),
+		),
 	)
 
 	err = writeImage("out.png", destinationImage)
