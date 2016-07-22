@@ -140,12 +140,15 @@ func copyImage(img image.Image) draw.Image {
 		copyTo.Bounds(),
 		img,
 		image.ZP,
-		img.Src,
+		draw.Src,
 	)
 	return copyTo
 }
 
 func writeText(textConfig []string, destinationImage draw.Image) draw.Image {
+	// copy for easier semantics
+	destinationImage = copyImage(destinationImage)
+
 	for i, text := range textConfig {
 		// writing an empty string still does a background, so let's not do that
 		if text == "" {
