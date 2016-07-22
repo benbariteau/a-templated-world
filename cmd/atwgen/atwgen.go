@@ -96,7 +96,7 @@ func writeBackground(backgroundConfig backgroundConf, destinationImage draw.Imag
 }
 
 func getFont() *truetype.Font {
-	fontFd, err := os.Open("Loveletter_TW.ttf")
+	fontFd, err := os.Open("font.ttf")
 	if err != nil {
 		panic(err)
 	}
