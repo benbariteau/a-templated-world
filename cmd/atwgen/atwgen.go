@@ -280,8 +280,8 @@ func writeSingleText(textConfig textConf) draw.Image {
 			startPoint.Y-fontFace.Metrics().Ascent.Round(),
 			// bottom right x is the baseline start point x plus the calculated distance for drawing
 			startPoint.X+drawDistance.Round(),
-			// bottom right y is the same as the baseline
-			startPoint.Y,
+			// bottom right y is baseline plus the Descent
+			startPoint.Y+fontFace.Metrics().Descent.Round(),
 		),
 		// pad that rectangle
 		textBackgroundPadding,
