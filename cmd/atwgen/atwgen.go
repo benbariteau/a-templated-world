@@ -115,9 +115,9 @@ const (
 func baselinePointForPlacement(place placement) image.Point {
 	segmentSize := panelRectangle.Dy() / numPlacements
 
-	// multiply the number of segments above (which corresponds to the number of the placement)
+	// multiply the number of segments above (which corresponds to the number of the placement minus 1)
 	// then add half a segment to put it in the middle of that (this helps put it not right next to edges)
-	baselineY := int(place)*segmentSize + segmentSize/2
+	baselineY := (int(place)-1)*segmentSize + segmentSize/2
 	return image.Pt(baselineX, baselineY)
 }
 
@@ -211,7 +211,8 @@ func offsetY(text string) int {
 type placement int
 
 const (
-	topPlacement placement = iota
+	noPlacement placement = iota
+	topPlacement
 	topMiddlePlacement
 	middlePlacement
 	bottomMiddlePlacement
