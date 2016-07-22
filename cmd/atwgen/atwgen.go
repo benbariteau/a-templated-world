@@ -145,7 +145,7 @@ func copyImage(img image.Image) draw.Image {
 	return copyTo
 }
 
-func writeText(textConfig []string, destinationImage draw.Image) draw.Image {
+func writeTextList(textConfig []string, destinationImage draw.Image) draw.Image {
 	// copy for easier semantics
 	destinationImage = copyImage(destinationImage)
 
@@ -222,7 +222,7 @@ func writeImage(path string, image image.Image) error {
 }
 
 func main() {
-	destinationImage := writeText([]string{"foo", "", "baz"}, writeBackground(generateBasicTemplate()))
+	destinationImage := writeTextList([]string{"foo", "", "baz"}, writeBackground(generateBasicTemplate()))
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println(r)
