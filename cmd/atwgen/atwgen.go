@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"image"
 	"image/draw"
@@ -171,7 +172,7 @@ func writeTextList(textConfigList []textConf, destinationImage draw.Image) draw.
 
 	for i, textConfig := range textConfigList {
 		// writing an empty string still does a background, so let's not do that
-		if textConfig.text == "" {
+		if textConfig.Text == "" {
 			continue
 		}
 		// create text image for panel
@@ -232,8 +233,8 @@ const (
 )
 
 type textConf struct {
-	text  string
-	place placement
+	Text      string    `json:"text"`
+	Placement placement `json:"placment"`
 }
 
 func writeSingleText(textConfig textConf) draw.Image {
@@ -247,18 +248,18 @@ func writeSingleText(textConfig textConf) draw.Image {
 	)
 
 	// create a drawer to draw the text starting at the baseline point, in the font and measure the distance of the string
-	drawDistance := (&font.Drawer{Face: fontFace}).MeasureString(textConfig.text)
+	drawDistance := (&font.Drawer{Face: fontFace}).MeasureString(textConfig.Text)
 
 	// get the baseline start point based on the placement
-	if textConfig.place == noPlacement {
-		textConfig.place = choosePlacement(textConfig.text)
+	if textConfig.Placement == noPlacement {
+		textConfig.Placement = choosePlacement(textConfig.Text)
 	}
-	baselineStartPoint := baselinePointForPlacement(textConfig.place)
+	baselineStartPoint := baselinePointForPlacement(textConfig.Placement)
 
 	// add some variance to the starting baseline
 	startPoint := image.Pt(
-		baselineStartPoint.X+offsetX(textConfig.text),
-		baselineStartPoint.Y+offsetY(textConfig.text),
+		baselineStartPoint.X+offsetX(textConfig.Text),
+		baselineStartPoint.Y+offsetY(textConfig.Text),
 	)
 
 	borderRect := withPadding(
@@ -298,7 +299,7 @@ func writeSingleText(textConfig textConf) draw.Image {
 			startPoint.Y,
 		),
 	}
-	drawer.DrawString(textConfig.text)
+	drawer.DrawString(textConfig.Text)
 
 	return destinationImage
 }
@@ -313,15 +314,12 @@ func writeImage(path string, image image.Image) error {
 	return png.Encode(fd, image)
 }
 
+type config struct {
+	TextConfigList      []textConf `json:"panels"`
+	BackgroundImagePath string     `json:"background"`
+}
+
 func main() {
-	destinationImage := writeTextList(
-		[]textConf{
-			textConf{text: "foo"},
-			textConf{text: "bar"},
-			textConf{text: "baz"},
-		},
-		writeBackground(topMiddlePlacement, generateBasicTemplate()),
-	)
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println(r)
@@ -329,7 +327,27 @@ func main() {
 		}
 	}()
 
-	err := writeImage("out.png", destinationImage)
+	conf := config{}
+	configFd, err := os.Open("config.json")
+	if err != nil {
+		panic(err)
+	}
+	err = json.NewDecoder(configFd).Decode(&conf)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(conf)
+
+	destinationImage := writeTextList(
+		[]textConf{
+			textConf{Text: "foo"},
+			textConf{Text: "bar"},
+			textConf{Text: "baz"},
+		},
+		writeBackground(topMiddlePlacement, generateBasicTemplate()),
+	)
+
+	err = writeImage("out.png", destinationImage)
 	if err != nil {
 		panic(err)
 	}
