@@ -7,3 +7,4 @@ import:
   subpackages:
   - font
   - math/fixed
+- package: github.com/nfnt/resize

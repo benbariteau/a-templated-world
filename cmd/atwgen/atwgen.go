@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/golang/freetype/truetype"
+	"github.com/nfnt/resize"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )
@@ -54,6 +55,15 @@ func generateBasicTemplate() draw.Image {
 func writeBackground(destinationImage draw.Image) draw.Image {
 	templateMask := mustGetImage("template_mask.png")
 	backgroundImage := mustGetImage("background")
+
+	// resize to the size of the template
+	backgroundImage = resize.Resize(
+		// scale to the width of the template
+		720,
+		0,
+		backgroundImage,
+		resize.Bilinear,
+	)
 
 	draw.DrawMask(
 		destinationImage,
