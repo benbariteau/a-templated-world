@@ -112,6 +112,8 @@ const (
 	textBackgroundPadding = 3
 )
 
+var baselineStartPoint = image.Point(baselineX, baselineY)
+
 func withPadding(rect image.Rectangle, padding int) image.Rectangle {
 	return image.Rect(
 		rect.Min.X-padding,
