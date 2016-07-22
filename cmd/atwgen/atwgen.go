@@ -108,18 +108,10 @@ var panelToTopLeft = map[int]image.Point{
 	1: image.Pt(254, 37),
 	2: image.Pt(493, 38),
 }
-var panel1TopLeft = panelToTopLeft[0]
-
-var panel1Rectangle = image.Rectangle{
-	panel1TopLeft,
-	image.Pt(225, 275-22),
-}
 
 var panelRectangle = image.Rect(
-	0,
-	0,
-	panel1Rectangle.Dx(),
-	panel1Rectangle.Dy(),
+	0, 0,
+	212, 216,
 )
 
 var panelToRectangle = func() map[int]image.Rectangle {
