@@ -177,8 +177,6 @@ func writeSingleText(text string) draw.Image {
 
 	// create a drawer to draw the text starting at the baseline point, in the font
 	drawer := &font.Drawer{
-		Dst:  destinationImage,
-		Src:  image.Black,
 		Face: fontFace,
 		Dot:  startPoint,
 	}
@@ -211,6 +209,10 @@ func writeSingleText(text string) draw.Image {
 		image.ZP,
 		draw.Over,
 	)
+
+	// draw the text, in black to the return value
+	drawer.Dst = destinationImage
+	drawer.Src = image.Black
 	drawer.DrawString(text)
 
 	return destinationImage
