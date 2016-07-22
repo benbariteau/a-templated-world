@@ -103,7 +103,12 @@ func withPadding(rect image.Rectangle, padding int) image.Rectangle {
 	)
 }
 
-var panel1TopLeft = image.Pt(13, 275-236)
+var panelToTopLeft = map[int]image.Point{
+	0: image.Pt(13, 37),
+	1: image.Pt(254, 37),
+	2: image.Pt(493, 38),
+}
+var panel1TopLeft = panelToTopLeft[0]
 
 var panel1Rectangle = image.Rectangle{
 	panel1TopLeft,
@@ -117,19 +122,29 @@ var panelRectangle = image.Rect(
 	panel1Rectangle.Dy(),
 )
 
+var panelToRectangle = func() map[int]image.Rectangle {
+	m := make(map[int]image.Rectangle)
+	for panelNumber, topLeft := range panelToTopLeft {
+		m[panelNumber] = panelRectangle.Add(topLeft)
+	}
+	return m
+}()
+
 func writeText(textConfig []string, destinationImage draw.Image) draw.Image {
-	// create text image for panel
-	textImage := writeLessText(textConfig[0])
-	// write text image on top of panel
-	draw.DrawMask(
-		destinationImage,
-		panel1Rectangle,
-		textImage,
-		image.ZP,
-		image.Black,
-		image.ZP,
-		draw.Over,
-	)
+	for i, text := range textConfig {
+		// create text image for panel
+		textImage := writeLessText(text)
+		// write text image on top of panel
+		draw.DrawMask(
+			destinationImage,
+			panelToRectangle[i],
+			textImage,
+			image.ZP,
+			image.Black,
+			image.ZP,
+			draw.Over,
+		)
+	}
 	return destinationImage
 }
 
@@ -185,7 +200,7 @@ func writeImage(path string, image image.Image) error {
 }
 
 func main() {
-	destinationImage := writeText([]string{"foo bar"}, writeBackground(generateBasicTemplate()))
+	destinationImage := writeText([]string{"foo", "bar", "baz"}, writeBackground(generateBasicTemplate()))
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println(r)
