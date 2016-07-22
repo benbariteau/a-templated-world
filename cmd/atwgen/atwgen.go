@@ -108,9 +108,18 @@ const (
 	comicHeight           = 275
 	fontSize              = 14.0
 	textBackgroundPadding = 3
+	numPlacements         = 5
+	baselineX             = 30
 )
 
-var baselineStartPoint = image.Pt(30, 120)
+func baselinePointForPlacement(place placement) image.Point {
+	segmentSize := panelRectangle.Dy() / numPlacements
+
+	// multiply the number of segments above (which corresponds to the number of the placement)
+	// then add half a segment to put it in the middle of that (this helps put it not right next to edges)
+	baselineY := int(place)*segmentSize + segmentSize/2
+	return image.Pt(baselineX, baselineY)
+}
 
 func withPadding(rect image.Rectangle, padding int) image.Rectangle {
 	return image.Rect(
@@ -165,7 +174,7 @@ func writeTextList(textConfig []string, destinationImage draw.Image) draw.Image 
 			continue
 		}
 		// create text image for panel
-		textImage := writeSingleText(textConf{text, middlePlacement})
+		textImage := writeSingleText(textConf{text, topMiddlePlacement})
 		// write text image on top of panel
 		draw.DrawMask(
 			destinationImage,
@@ -226,6 +235,9 @@ func writeSingleText(textConfig textConf) draw.Image {
 
 	// create a drawer to draw the text starting at the baseline point, in the font and measure the distance of the string
 	drawDistance := (&font.Drawer{Face: fontFace}).MeasureString(textConfig.text)
+
+	// get the baseline start point based on the placement
+	baselineStartPoint := baselinePointForPlacement(textConfig.place)
 
 	// add some variance to the starting baseline
 	startPoint := image.Pt(
