@@ -234,7 +234,7 @@ const (
 
 type textConf struct {
 	Text      string    `json:"text"`
-	Placement placement `json:"placment"`
+	Placement placement `json:"placement"`
 }
 
 func writeSingleText(textConfig textConf) draw.Image {
@@ -314,9 +314,43 @@ func writeImage(path string, image image.Image) error {
 	return png.Encode(fd, image)
 }
 
+type panelConf struct {
+	Text      string `json:"text"`
+	Placement string `json:"placement"`
+}
+
 type config struct {
-	TextConfigList      []textConf `json:"panels"`
-	BackgroundImagePath string     `json:"background"`
+	PanelConfigList     []panelConf `json:"panels"`
+	BackgroundImagePath string      `json:"background"`
+}
+
+func panelConfList2textConfList(panelConfigList []panelConf) []textConf {
+	textConfigList := make([]textConf, 0, len(panelConfigList))
+	for _, panelConfig := range panelConfigList {
+		place := noPlacement
+
+		switch panelConfig.Placement {
+		case "top":
+			place = topPlacement
+		case "top-middle":
+			place = topMiddlePlacement
+		case "middle":
+			place = middlePlacement
+		case "bottom-middle":
+			place = bottomMiddlePlacement
+		case "bottom":
+			place = bottomPlacement
+		}
+
+		textConfigList = append(
+			textConfigList,
+			textConf{
+				Text:      panelConfig.Text,
+				Placement: place,
+			},
+		)
+	}
+	return textConfigList
 }
 
 func main() {
@@ -339,11 +373,7 @@ func main() {
 	fmt.Println(conf)
 
 	destinationImage := writeTextList(
-		[]textConf{
-			textConf{Text: "foo"},
-			textConf{Text: "bar"},
-			textConf{Text: "baz"},
-		},
+		panelConfList2textConfList(conf.PanelConfigList),
 		writeBackground(topMiddlePlacement, generateBasicTemplate()),
 	)
 
