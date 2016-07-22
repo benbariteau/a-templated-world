@@ -163,14 +163,19 @@ func writeTextList(textConfig []string, destinationImage draw.Image) draw.Image 
 }
 
 func writeSingleText(text string) draw.Image {
+	// create a panel image to draw our text to
 	destinationImage := image.NewNRGBA(panelRectangle)
 
+	// create font face for our font
 	fontFace := truetype.NewFace(
 		getFont(),
 		&truetype.Options{Size: fontSize},
 	)
 
+	// create the start point for our baseline for the text
 	startPoint := fixed.P(baselineX, baselineY)
+
+	// create a drawer to draw the text starting at the baseline point, in the font
 	drawer := &font.Drawer{
 		Dst:  destinationImage,
 		Src:  image.Black,
@@ -178,17 +183,25 @@ func writeSingleText(text string) draw.Image {
 		Dot:  startPoint,
 	}
 
+	// measure the distance of the string
 	drawDistance := drawer.MeasureString(text)
 	borderRect := withPadding(
+		// create a rectangle for the border
 		image.Rect(
+			// top left x is the same as the baseline
 			baselineX,
+			// top left y is the baseline y moved up by the ascent of the font (the distance between the baseline and the top of the font)
 			baselineY-fontFace.Metrics().Ascent.Round(),
+			// bottom right x is the baseline start point x plus the calculated distance for drawing
 			baselineX+drawDistance.Round(),
+			// bottom right y is the same as the baseline
 			baselineY,
 		),
+		// pad that rectangle
 		textBackgroundPadding,
 	)
 
+	// draw the background rectangle into the destination image in white
 	draw.DrawMask(
 		destinationImage,
 		destinationImage.Bounds(),
