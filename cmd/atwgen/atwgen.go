@@ -175,14 +175,9 @@ func writeSingleText(text string) draw.Image {
 	// create the start point for our baseline for the text
 	startPoint := fixed.P(baselineX, baselineY)
 
-	// create a drawer to draw the text starting at the baseline point, in the font
-	drawer := &font.Drawer{
-		Face: fontFace,
-		Dot:  startPoint,
-	}
+	// create a drawer to draw the text starting at the baseline point, in the font and measure the distance of the string
+	drawDistance := (&font.Drawer{Face: fontFace, Dot: startPoint}).MeasureString(text)
 
-	// measure the distance of the string
-	drawDistance := drawer.MeasureString(text)
 	borderRect := withPadding(
 		// create a rectangle for the border
 		image.Rect(
@@ -211,8 +206,12 @@ func writeSingleText(text string) draw.Image {
 	)
 
 	// draw the text, in black to the return value
-	drawer.Dst = destinationImage
-	drawer.Src = image.Black
+	drawer := &font.Drawer{
+		Dst:  destinationImage,
+		Src:  image.Black,
+		Face: fontFace,
+		Dot:  startPoint,
+	}
 	drawer.DrawString(text)
 
 	return destinationImage
