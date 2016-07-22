@@ -338,23 +338,26 @@ type config struct {
 	BackgroundConfig comicBackgroundConf `json:"background"`
 }
 
+func string2placement(str string) (place placement) {
+	switch str {
+	case "top":
+		place = topPlacement
+	case "top-middle":
+		place = topMiddlePlacement
+	case "middle":
+		place = middlePlacement
+	case "bottom-middle":
+		place = bottomMiddlePlacement
+	case "bottom":
+		place = bottomPlacement
+	}
+	return
+}
+
 func panelConfList2textConfList(panelConfigList []panelConf) []textConf {
 	textConfigList := make([]textConf, 0, len(panelConfigList))
 	for _, panelConfig := range panelConfigList {
-		place := noPlacement
-
-		switch panelConfig.Placement {
-		case "top":
-			place = topPlacement
-		case "top-middle":
-			place = topMiddlePlacement
-		case "middle":
-			place = middlePlacement
-		case "bottom-middle":
-			place = bottomMiddlePlacement
-		case "bottom":
-			place = bottomPlacement
-		}
+		place := string2placement(panelConfig.Placement)
 
 		textConfigList = append(
 			textConfigList,
