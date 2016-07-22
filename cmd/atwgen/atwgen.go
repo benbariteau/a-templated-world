@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"image"
 	"image/draw"
@@ -97,17 +96,45 @@ const (
 
 func withPadding(rect image.Rectangle, padding int) image.Rectangle {
 	return image.Rect(
-		rect.Min.X-paddingPixels,
-		rect.Min.Y-paddingPixels,
-		rect.Max.X+paddingPixels,
-		rect.Max.Y+paddingPixels,
+		rect.Min.X-padding,
+		rect.Min.Y-padding,
+		rect.Max.X+padding,
+		rect.Max.Y+padding,
 	)
 }
 
+var panel1TopLeft = image.Pt(13, 275-236)
+
+var panel1Rectangle = image.Rectangle{
+	panel1TopLeft,
+	image.Pt(225, 275-22),
+}
+
+var panelRectangle = image.Rect(
+	0,
+	0,
+	panel1Rectangle.Dx(),
+	panel1Rectangle.Dy(),
+)
+
 func writeText(textConfig []string, destinationImage draw.Image) draw.Image {
-	if len(textConfig) > 3 {
-		panic(errors.New("more than three captions specified"))
-	}
+	// create text image for panel
+	textImage := writeLessText(textConfig[0])
+	// write text image on top of panel
+	draw.DrawMask(
+		destinationImage,
+		panel1Rectangle,
+		textImage,
+		image.ZP,
+		image.Black,
+		image.ZP,
+		draw.Over,
+	)
+	return destinationImage
+}
+
+func writeLessText(text string) draw.Image {
+	destinationImage := image.NewNRGBA(panelRectangle)
 
 	fontFace := truetype.NewFace(
 		getFont(),
@@ -122,8 +149,7 @@ func writeText(textConfig []string, destinationImage draw.Image) draw.Image {
 		Dot:  startPoint,
 	}
 
-	drawDistance := drawer.MeasureString(textConfig[0])
-	paddingPixels := textBackgroundPadding
+	drawDistance := drawer.MeasureString(text)
 	borderRect := withPadding(
 		image.Rect(
 			baselineX,
@@ -133,6 +159,7 @@ func writeText(textConfig []string, destinationImage draw.Image) draw.Image {
 		),
 		textBackgroundPadding,
 	)
+
 	draw.DrawMask(
 		destinationImage,
 		destinationImage.Bounds(),
@@ -142,7 +169,7 @@ func writeText(textConfig []string, destinationImage draw.Image) draw.Image {
 		image.ZP,
 		draw.Over,
 	)
-	drawer.DrawString(textConfig[0])
+	drawer.DrawString(text)
 
 	return destinationImage
 }
