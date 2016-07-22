@@ -174,7 +174,7 @@ func writeTextList(textConfig []string, destinationImage draw.Image) draw.Image 
 			continue
 		}
 		// create text image for panel
-		textImage := writeSingleText(textConf{text, topMiddlePlacement})
+		textImage := writeSingleText(textConf{text: text})
 		// write text image on top of panel
 		draw.DrawMask(
 			destinationImage,
@@ -198,6 +198,12 @@ func hashString(text string, reduce func(left, right rune) rune) int {
 		accumulator = reduce(accumulator, ch)
 	}
 	return int(accumulator)
+}
+
+func choosePlacement(text string) placement {
+	hash := hashString(text, func(left, right rune) rune { return left | right })
+	// mod by the number of placements and then add one to not get noPlacement
+	return placement((hash % numPlacements) + 1)
 }
 
 func offset(text string, reduce func(left, right rune) rune) int {
@@ -243,6 +249,9 @@ func writeSingleText(textConfig textConf) draw.Image {
 	drawDistance := (&font.Drawer{Face: fontFace}).MeasureString(textConfig.text)
 
 	// get the baseline start point based on the placement
+	if textConfig.place == noPlacement {
+		textConfig.place = choosePlacement(textConfig.text)
+	}
 	baselineStartPoint := baselinePointForPlacement(textConfig.place)
 
 	// add some variance to the starting baseline
