@@ -60,7 +60,10 @@ type backgroundConf struct {
 
 func writeBackground(backgroundConfig backgroundConf, destinationImage draw.Image) draw.Image {
 	templateMask := mustGetImage("template_mask.png")
-	backgroundImage := mustGetImage("background")
+	if backgroundConfig.Path == "" {
+		backgroundConfig.Path = "background"
+	}
+	backgroundImage := mustGetImage(backgroundConfig.Path)
 
 	// resize to the size of the template
 	backgroundImage = resize.Resize(
@@ -325,9 +328,14 @@ type panelConf struct {
 	Placement string `json:"placement"`
 }
 
+type comicBackgroundConf struct {
+	Path      string `json:"path"`
+	Placement string `json:"placement"`
+}
+
 type config struct {
-	PanelConfigList     []panelConf `json:"panels"`
-	BackgroundImagePath string      `json:"background"`
+	PanelConfigList  []panelConf         `json:"panels"`
+	BackgroundConfig comicBackgroundConf `json:"background"`
 }
 
 func panelConfList2textConfList(panelConfigList []panelConf) []textConf {
