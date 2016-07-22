@@ -130,6 +130,21 @@ var panelToRectangle = func() map[int]image.Rectangle {
 	return m
 }()
 
+func copyImage(img image.Image) draw.Image {
+	// create a new image
+	copyTo := image.NewNRGBA(img.Bounds())
+
+	// copy stuff to that image
+	draw.Draw(
+		copyTo,
+		copyTo.Bounds(),
+		img,
+		image.ZP,
+		img.Src,
+	)
+	return copyTo
+}
+
 func writeText(textConfig []string, destinationImage draw.Image) draw.Image {
 	for i, text := range textConfig {
 		// writing an empty string still does a background, so let's not do that
