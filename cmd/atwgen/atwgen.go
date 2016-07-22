@@ -52,7 +52,7 @@ func generateBasicTemplate() draw.Image {
 	return destinationImage
 }
 
-func writeBackground(destinationImage draw.Image) draw.Image {
+func writeBackground(place placement, destinationImage draw.Image) draw.Image {
 	templateMask := mustGetImage("template_mask.png")
 	backgroundImage := mustGetImage("background")
 
@@ -64,11 +64,12 @@ func writeBackground(destinationImage draw.Image) draw.Image {
 		backgroundImage,
 		resize.Bilinear,
 	)
-	// this centers the background image such that the center of it (vertically) is in the center of the comic
-	backgroundStartingY := (backgroundImage.Bounds().Dy() - comicHeight) / 2
-	if backgroundStartingY < 0 {
-		// this probably looks bad because it means the image is shorted than the comic
-		backgroundStartingY = 0
+	backgroundImageHeight := backgroundImage.Bounds().Dy()
+	backgroundSegmentSize := backgroundImageHeight / 5
+	backgroundStartingY := (int(place) - 1) * backgroundSegmentSize
+
+	if destinationImageHeight, pixelsInImage := destinationImage.Bounds().Dy(), backgroundImageHeight-backgroundStartingY; pixelsInImage < destinationImageHeight {
+		backgroundStartingY = backgroundImageHeight - destinationImageHeight
 	}
 
 	draw.DrawMask(
@@ -319,7 +320,7 @@ func main() {
 			textConf{text: "bar"},
 			textConf{text: "baz"},
 		},
-		writeBackground(generateBasicTemplate()),
+		writeBackground(topMiddlePlacement, generateBasicTemplate()),
 	)
 	defer func() {
 		if r := recover(); r != nil {
