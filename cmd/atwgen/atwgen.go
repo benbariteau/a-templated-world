@@ -212,7 +212,7 @@ func hashString(text string, reduce func(left, right rune) rune) int {
 }
 
 func choosePlacement(text string) placement {
-	hash := hashString(text, func(left, right rune) rune { return left | right })
+	hash := hashString(text, func(left, right rune) rune { return left ^ right })
 	// mod by the number of placements and then add one to not get noPlacement
 	return placement((hash % numPlacements) + 1)
 }
