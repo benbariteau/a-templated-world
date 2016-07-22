@@ -192,12 +192,17 @@ func writeTextList(textConfig []string, destinationImage draw.Image) draw.Image 
 // between -10 and 10 pixel offset
 const offsetBound = 21
 
-func offset(text string, reduce func(left, right rune) rune) int {
+func hashString(text string, reduce func(left, right rune) rune) int {
 	var accumulator rune
 	for _, ch := range text {
 		accumulator = reduce(accumulator, ch)
 	}
-	return int(accumulator%offsetBound - (offsetBound / 2))
+	return int(accumulator)
+}
+
+func offset(text string, reduce func(left, right rune) rune) int {
+	hash := hashString(text, reduce)
+	return int(hash%offsetBound - (offsetBound / 2))
 }
 
 func offsetX(text string) int {
