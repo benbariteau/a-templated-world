@@ -165,7 +165,7 @@ func writeTextList(textConfig []string, destinationImage draw.Image) draw.Image 
 			continue
 		}
 		// create text image for panel
-		textImage := writeSingleText(text)
+		textImage := writeSingleText(textConf{text, middlePlacement})
 		// write text image on top of panel
 		draw.DrawMask(
 			destinationImage,
@@ -199,7 +199,22 @@ func offsetY(text string) int {
 	return offset(text, func(left, right rune) rune { return left + right })
 }
 
-func writeSingleText(text string) draw.Image {
+type placement int
+
+const (
+	topPlacement placement = iota
+	topMiddlePlacement
+	middlePlacement
+	bottomMiddlePlacement
+	bottomPlacement
+)
+
+type textConf struct {
+	text  string
+	place placement
+}
+
+func writeSingleText(textConfig textConf) draw.Image {
 	// create a panel image to draw our text to
 	destinationImage := image.NewNRGBA(panelRectangle)
 
@@ -210,12 +225,12 @@ func writeSingleText(text string) draw.Image {
 	)
 
 	// create a drawer to draw the text starting at the baseline point, in the font and measure the distance of the string
-	drawDistance := (&font.Drawer{Face: fontFace}).MeasureString(text)
+	drawDistance := (&font.Drawer{Face: fontFace}).MeasureString(textConfig.text)
 
 	// add some variance to the starting baseline
 	startPoint := image.Pt(
-		baselineStartPoint.X+offsetX(text),
-		baselineStartPoint.Y+offsetY(text),
+		baselineStartPoint.X+offsetX(textConfig.text),
+		baselineStartPoint.Y+offsetY(textConfig.text),
 	)
 
 	borderRect := withPadding(
@@ -255,7 +270,7 @@ func writeSingleText(text string) draw.Image {
 			startPoint.Y,
 		),
 	}
-	drawer.DrawString(text)
+	drawer.DrawString(textConfig.text)
 
 	return destinationImage
 }
